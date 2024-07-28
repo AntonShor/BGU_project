@@ -1,32 +1,46 @@
-try:
-    with open('city.txt', 'r') as text_file:
-        lines = text_file.readlines()
-        lines.sort()
-        ct = []
-        pop = []
-        a = []
-        question = int(input('Enter the number:\n'))
-        for i in range(len(lines)):
-            line = lines[i].strip()
-            colon = line.index(':')
-            city = line[:colon]
-            ct.append(city)
-            population = line[colon+1:]
-            pop.append(population)
-        for j in range(len(pop)):
-            if int(pop[j])>question:
-                a.append(ct[j])
-                a.append(':')
-                a.append(pop[j])
-        
-        
-except FileNotFoundError:
-    print('This file does not exist. Please come back later')
-    
+def read_cities_from_file() -> list[tuple[str, int]]:
+    cities_population = []
+    try:
+        with open("cities.txt", "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                try:
+                    city, population = map(str.strip, line.split(":"))
+                    cities_population.append((city, int(population)))
+                except ValueError:
+                    print(f"Error parsing line: {line.strip()}")
+    except FileNotFoundError:
+        print("Input file not found.")
+    return cities_population
 
 
-with open('filtered_ct.txt', 'w') as text_file:
-    for k in range(len(a)//3):
-        print(*a[3*k:3*(k+1)], sep ='', file = text_file)
-       
+def write_cities_to_file(cities_population: list[tuple[str, int]]) -> None:
+    with open("filtered_cities.txt", "w") as f:
+        for city, population in cities_population:
+            f.write(f"{city}:{population}\n")
 
+
+def filter_cities_from_file(min_population: int) -> None:
+    try:
+        cities_population = read_cities_from_file()
+        filtered_cities_population = [
+            city for city in cities_population if city[1] > min_population
+        ]
+        filtered_cities_population.sort(key=lambda city: city[0])
+        write_cities_to_file(filtered_cities_population)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def main():
+    while True:
+        try:
+            min_population = int(input("Please enter the minimum number of population: "))
+            break
+        except ValueError:
+            print('Invalid input, please enter an integer value.')
+    filter_cities_from_file(min_population)
+
+
+if __name__ == '__main__':
+    main()
